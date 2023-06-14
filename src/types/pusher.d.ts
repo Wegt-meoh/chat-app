@@ -1,4 +1,4 @@
 type IncomingFriendRequest = {
-  senderId: string;
-  senderEmail: string | null | undefined;
+    senderId: string;
+    senderEmail: string | null | undefined;
 };

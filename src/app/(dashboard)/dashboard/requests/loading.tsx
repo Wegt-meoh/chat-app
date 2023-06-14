@@ -5,12 +5,12 @@ import "react-loading-skeleton/dist/skeleton.css";
 type Props = {};
 
 export default function Loading({}: Props) {
-  return (
-    <div className="w-full flex flex-col gap-3">
-      <Skeleton width={500} height={60} className="mb-8" />
-      <Skeleton width={350} height={20} />
-      <Skeleton width={350} height={20} />
-      <Skeleton width={350} height={20} />
-    </div>
-  );
+    return (
+        <div className="w-full flex flex-col gap-3">
+            <Skeleton width={500} height={60} className="mb-8" />
+            <Skeleton width={350} height={20} />
+            <Skeleton width={350} height={20} />
+            <Skeleton width={350} height={20} />
+        </div>
+    );
 }
