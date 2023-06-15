@@ -9,10 +9,9 @@ import { Icons } from "./Icons";
 
 type Props = {
     chatId: string;
-    chatPartner: User;
 };
 
-export default function ChatInput({ chatId, chatPartner }: Props) {
+export default function ChatInput({ chatId }: Props) {
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isFocus, setIsFocus] = useState(false);
@@ -41,6 +40,7 @@ export default function ChatInput({ chatId, chatPartner }: Props) {
             await axios.post("/api/message/send", {
                 text: input,
                 chatId: chatId,
+                timestamp: new Date(),
             });
             setInput("");
             textareaRef.current?.focus();

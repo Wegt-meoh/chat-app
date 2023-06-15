@@ -5,7 +5,6 @@ import UserImage from "./UserImage";
 import { TextBlock } from "./TextBlock";
 import Timestamp from "./Timestamp";
 import { pusherClient } from "@/lib/pusher";
-import { useRouter } from "next/navigation";
 
 type Props = {
     chatId: string;

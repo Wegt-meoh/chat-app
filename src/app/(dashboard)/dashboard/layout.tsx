@@ -49,6 +49,7 @@ export default async function Layout({ children }: Props) {
         <div className="w-full flex h-screen">
             <div className="hidden flex-shrink-0 md:flex h-full w-full max-w-xs grow flex-col overflow-x-hidden gap-y-5 overflow-y-auto border-r border-gray-200 bg-white">
                 <Link
+                    title="dashboard"
                     href="/dashboard"
                     className="flex h-16 shrink-0 items-center pl-6"
                 >
@@ -56,8 +57,16 @@ export default async function Layout({ children }: Props) {
                 </Link>
 
                 {friends.length === 0 ? null : (
-                    <div className="text-xs font-semibold leading-6 text-gray-400">
-                        Your chats
+                    <div>
+                        <div className="ml-3 text-xs font-semibold leading-6 text-gray-400">
+                            Your chats
+                        </div>
+                        <div className="ml-6">
+                            <SidebarChatList
+                                initialFriends={friends}
+                                sessionId={session.user.id}
+                            />
+                        </div>
                     </div>
                 )}
 
@@ -66,14 +75,6 @@ export default async function Layout({ children }: Props) {
                         role="list"
                         className="flex flex-1 flex-col gap-y-7 h-full"
                     >
-                        <li>
-                            {friends.length === 0 ? null : (
-                                <SidebarChatList
-                                    initialFriends={friends}
-                                    sessionId={session.user.id}
-                                />
-                            )}
-                        </li>
                         <li>
                             <h2 className="pl-3 text-xs font-semibold leading-6 text-gray-400">
                                 Overview
@@ -107,36 +108,44 @@ export default async function Layout({ children }: Props) {
                                 </li>
                             </ul>
                         </li>
-
-                        <li className="mt-auto flex items-center justify-between">
-                            <div className="flex flex-shrink items-center gap-x-4 px-4 py-3 text-sm font-semibold leading-6">
-                                <div className="relative w-8 h-8 bg-gray-50">
-                                    <Image
-                                        fill
-                                        sizes="32px"
-                                        referrerPolicy="no-referrer"
-                                        className=" rounded-full"
-                                        src={session.user.image || ""}
-                                        alt="profile picture"
-                                    />
-                                </div>
-                                <span className="sr-only">Your profile</span>
-                                <div className="flex flex-col">
-                                    <span aria-hidden className="w-32 truncate">
-                                        {session.user.name}
-                                    </span>
-                                    <span
-                                        className=" text-xs text-zinc-400 w-32 truncate"
-                                        aria-hidden
-                                    >
-                                        {session.user.email}
-                                    </span>
-                                </div>
-                            </div>
-                            <SignOutButton className="h-full aspect-square" />
-                        </li>
                     </ul>
                 </nav>
+                <div className="flex justify-between">
+                    <div className="flex items-center gap-4 px-4 py-3 text-sm font-semibold leading-6">
+                        <div className="relative w-8 h-8 bg-gray-50">
+                            <Image
+                                fill
+                                sizes="32px"
+                                referrerPolicy="no-referrer"
+                                className="rounded-full"
+                                src={session.user.image || ""}
+                                alt="profile picture"
+                            />
+                        </div>
+                        <span className="sr-only">Your profile</span>
+                        <div className="flex flex-col">
+                            <span
+                                aria-hidden
+                                className="w-40 truncate"
+                                title={session.user.name ?? undefined}
+                            >
+                                {session.user.name}
+                            </span>
+                            <span
+                                className=" text-xs text-zinc-400 w-40 truncate"
+                                aria-hidden
+                                title={session.user.email ?? undefined}
+                            >
+                                {session.user.email}
+                            </span>
+                        </div>
+                    </div>
+                    <SignOutButton
+                        type="button"
+                        title="signout"
+                        className="h-full aspect-square"
+                    />
+                </div>
             </div>
             <div className="flex-1">{children}</div>
         </div>

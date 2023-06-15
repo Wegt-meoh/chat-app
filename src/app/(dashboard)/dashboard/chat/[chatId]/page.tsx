@@ -73,7 +73,7 @@ export default async function Page({ params }: Props) {
                 sessionId={session.user.id}
                 initialMessages={initialMessages}
             />
-            <ChatInput chatId={chatId} chatPartner={chatPartner} />
+            <ChatInput chatId={chatId} />
         </div>
     );
 }

@@ -9,7 +9,8 @@ import { getServerSession } from "next-auth";
 
 export async function POST(req: Request) {
     try {
-        const body: { text: string; chatId: string } = await req.json();
+        const body: { text: string; chatId: string; timestamp: number } =
+            await req.json();
         const session = await getServerSession(authOptions);
 
         if (!session) {
@@ -26,13 +27,12 @@ export async function POST(req: Request) {
             throw new Response("Unauthoried", { status: 401 });
         }
 
-        const timestamp = Date.now();
         const messageData: Message = {
             id: nanoid(),
             senderId: session.user.id,
             receiverId: body.chatId,
             text: body.text,
-            timestamp: timestamp,
+            timestamp: body.timestamp,
         };
         const message = messageValidator.parse(messageData);
 
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
                     body.chatId
                 )}:messages`,
                 {
-                    score: timestamp,
+                    score: body.timestamp,
                     member: JSON.stringify(message),
                 }
             ),
