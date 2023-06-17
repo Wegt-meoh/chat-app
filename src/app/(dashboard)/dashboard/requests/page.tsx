@@ -11,20 +11,20 @@ export default async function Page({}: Props) {
     const session = await getServerSession(authOptions);
     if (!session) notFound();
 
-    const incomingRequestIds = (await fetchRedis(
+    const friendRequestSenderIdList = (await fetchRedis(
         "smembers",
         `user:${session.user.id}:incoming_friend_requests`
     )) as string[];
 
-    const incomingRequests = await Promise.all(
-        incomingRequestIds.map(async (id) => {
-            const senderInfo = JSON.parse(
+    const incomingRequests: FriendRequest[] = await Promise.all(
+        friendRequestSenderIdList.map(async (id) => {
+            const user: User = JSON.parse(
                 await fetchRedis("get", `user:${id}`)
-            ) as User;
-
+            );
             return {
-                senderId: senderInfo.id,
-                senderEmail: senderInfo.email,
+                senderId: user.id,
+                senderName: user.name,
+                senderEmail: user.email,
             };
         })
     );

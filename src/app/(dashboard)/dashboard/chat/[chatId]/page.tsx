@@ -8,7 +8,6 @@ import { messageArrayValidator } from "@/lib/validations/message";
 import { getServerSession } from "next-auth";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import React from "react";
 
 type Props = {
     params: { chatId: string };
@@ -20,15 +19,14 @@ async function getChatMessage(userId: string, partnerId: string) {
             "zrange",
             `chat:${chatHrefConstructor(userId, partnerId)}:messages`,
             0,
-            -1
+            -1,
+            "rev"
         );
 
         const dbMessages = result.map(
             (message) => JSON.parse(message) as Message
         );
-        const reversedDbMessages = dbMessages.reverse();
-        const messages: Message[] =
-            messageArrayValidator.parse(reversedDbMessages);
+        const messages: Message[] = messageArrayValidator.parse(dbMessages);
         return messages;
     } catch (error) {
         notFound();
@@ -36,12 +34,14 @@ async function getChatMessage(userId: string, partnerId: string) {
 }
 
 export default async function Page({ params }: Props) {
-    const { chatId } = params;
     const session = await getServerSession(authOptions);
-
     if (!session) notFound();
+
+    const { chatId } = params;
     const { user } = session;
-    const chatPartner = (await db.get(`user:${chatId}`)) as User;
+    const chatPartner = JSON.parse(
+        await fetchRedis("get", `user:${chatId}`)
+    ) as User;
     const initialMessages = await getChatMessage(user.id, chatId);
     return (
         <div className="flex-1 justify-between flex flex-col h-screen">

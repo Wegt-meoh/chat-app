@@ -1,5 +1,5 @@
-import { UpstashRedisAdapter } from "@auth/upstash-redis-adapter";
-import { AuthOptions } from "next-auth";
+import { UpstashRedisAdapter } from "@next-auth/upstash-redis-adapter";
+import { NextAuthOptions } from "next-auth";
 import { db } from "./db";
 import GithubProvider from "next-auth/providers/github";
 import FacebookProvider from "next-auth/providers/facebook";
@@ -41,8 +41,8 @@ function getFacebookCredentials() {
     };
 }
 
-export const authOptions: AuthOptions = {
-    adapter: UpstashRedisAdapter(db) as any,
+export const authOptions: NextAuthOptions = {
+    adapter: UpstashRedisAdapter(db),
     session: {
         strategy: "jwt",
     },

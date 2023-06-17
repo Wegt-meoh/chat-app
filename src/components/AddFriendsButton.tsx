@@ -1,24 +1,27 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import Button from "./ui/Button";
 import axios, { AxiosError } from "axios";
 import { addFriendValidator } from "@/lib/validations/add-friend";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { PlusIcon } from "lucide-react";
 
 type Props = {};
 
 type FormData = z.infer<typeof addFriendValidator>;
 
 export default function AddFriendsButton({}: Props) {
+    const [isLoading, setIsLoading] = useState(false);
     const [showSuccessState, setShowSuccessState] = useState(false);
     const { register, handleSubmit, setError, formState } = useForm<FormData>({
         resolver: zodResolver(addFriendValidator),
     });
 
     const addFriend = async (email: string) => {
+        setIsLoading(true);
         try {
             setShowSuccessState(false);
             const validatedEmail = addFriendValidator.parse({ email });
@@ -38,6 +41,8 @@ export default function AddFriendsButton({}: Props) {
             }
 
             setError("email", { message: "Something went wrong" });
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -62,7 +67,16 @@ export default function AddFriendsButton({}: Props) {
                         className="block w-full rounded-md border-0 py-1.5 px-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                         placeholder="something@example.com"
                     />
-                    <Button type="submit">Add</Button>
+                    <Button type="submit" isLoading={isLoading}>
+                        {isLoading ? null : (
+                            <PlusIcon
+                                width={"16px"}
+                                height={"16px"}
+                                className="mr-2"
+                            />
+                        )}
+                        send
+                    </Button>
                 </div>
                 {showSuccessState ? (
                     <p className="text-sm text-green-400">

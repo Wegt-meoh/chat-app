@@ -1,9 +1,8 @@
 "use client";
-import { pusherClient } from "@/lib/pusher";
+import { pusherClient } from "@/lib/pusher-client";
 import { toPusherKey } from "@/lib/utils";
 import axios from "axios";
 import { Check, UserPlus, X } from "lucide-react";
-import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 type Props = {
@@ -15,54 +14,37 @@ export default function FriendRequests({
     incomingFriendRequests,
     sessionId,
 }: Props) {
-    const router = useRouter();
-    const [friendRequests, setFriendRequests] = useState(
-        incomingFriendRequests
-    );
+    const friendRequests = incomingFriendRequests;
+    // const [friendRequests, setFriendRequests] = useState(
+    //     incomingFriendRequests
+    // );
 
     async function acceptFriend(senderId: string) {
         await axios.post("/api/friend/accept", { senderId });
-
-        setFriendRequests((prev) =>
-            prev.filter((item) => item.senderId !== senderId)
-        );
-
-        router.refresh();
+        // setFriendRequests((prev) =>
+        //     prev.filter((item) => item.senderId !== senderId)
+        // );
     }
 
     async function denyFriend(senderId: string) {
         await axios.post("/api/friend/deny", { senderId });
-
-        setFriendRequests((prev) =>
-            prev.filter((item) => item.senderId !== senderId)
-        );
-
-        router.refresh();
+        // setFriendRequests((prev) =>
+        //     prev.filter((item) => item.senderId !== senderId)
+        // );
     }
 
-    useEffect(() => {
-        function friendRequestHandler({
-            senderId,
-            senderEmail,
-        }: IncomingFriendRequest) {
-            setFriendRequests((prev) => [{ senderEmail, senderId }, ...prev]);
-            router.refresh();
-        }
-        pusherClient.subscribe(
-            toPusherKey(`user:${sessionId}:incoming_friend_requests`)
-        );
-        pusherClient.bind("incoming_friend_requests", friendRequestHandler);
-
-        return () => {
-            pusherClient.unsubscribe(
-                toPusherKey(`user:${sessionId}:incoming_friend_requests`)
-            );
-            pusherClient.unbind(
-                "incoming_friend_requests",
-                friendRequestHandler
-            );
-        };
-    }, [sessionId, router]);
+    // useEffect(() => {
+    //     const channel = pusherClient.subscribe(
+    //         toPusherKey(`user:${sessionId}:incoming_friend_requests:details`)
+    //     );
+    //     channel.bind("added", (friendRequest: IncomingFriendRequest) => {
+    //         setFriendRequests((prev) => [friendRequest, ...prev]);
+    //     });
+    //     return () => {
+    //         channel.unsubscribe();
+    //         channel.unbind_all();
+    //     };
+    // }, [sessionId]);
 
     return (
         <>

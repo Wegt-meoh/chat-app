@@ -1,15 +1,15 @@
-import FriendRequestSideBarOptions from "@/components/FriendRequestSidebarOptions";
+import FriendRequestSideBarOption from "@/components/FriendRequestSidebarOptions";
 import { Icon, Icons } from "@/components/Icons";
 import SidebarChatList from "@/components/SidebarChatList";
 import SignOutButton from "@/components/SignOutButton";
 import { getFriendsByUserId } from "@/helpers/get-friends-by-user-id";
 import { fetchRedis } from "@/helpers/redis";
 import { authOptions } from "@/lib/auth";
-import { getServerSession } from "next-auth";
+import { getServerSession } from "next-auth/next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import React, { ReactNode } from "react";
+import { ReactNode } from "react";
 
 type Props = {
     children: ReactNode;
@@ -36,7 +36,7 @@ export default async function Layout({ children }: Props) {
 
     if (!session) notFound();
 
-    const friendRequestsCount = (
+    const friendRequestCount = (
         (await fetchRedis(
             "smembers",
             `user:${session.user.id}:incoming_friend_requests`
@@ -99,11 +99,11 @@ export default async function Layout({ children }: Props) {
                                     );
                                 })}
                                 <li>
-                                    <FriendRequestSideBarOptions
-                                        initialUnseenFriendRequestsCount={
-                                            friendRequestsCount
-                                        }
+                                    <FriendRequestSideBarOption
                                         sessionId={session.user.id}
+                                        initialFriendRequestCount={
+                                            friendRequestCount
+                                        }
                                     />
                                 </li>
                             </ul>

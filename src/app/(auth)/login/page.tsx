@@ -1,7 +1,7 @@
 "use client";
 
 import Button from "@/components/ui/Button";
-import React, { useState } from "react";
+import { useState } from "react";
 import { signIn } from "next-auth/react";
 import toast from "react-hot-toast";
 import { FacebookIcon } from "lucide-react";

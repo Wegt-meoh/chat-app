@@ -1,10 +1,10 @@
 "use client";
 import { chatHrefConstructor, cn, toPusherKey } from "@/lib/utils";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import UserImage from "./UserImage";
 import { TextBlock } from "./TextBlock";
 import Timestamp from "./Timestamp";
-import { pusherClient } from "@/lib/pusher";
+import { pusherClient } from "@/lib/pusher-client";
 
 type Props = {
     chatId: string;
@@ -24,11 +24,7 @@ export default function Messages({
     const scrollDownRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
-        function handleChat(msg: Message) {
-            setMessages((prev) => [msg, ...prev]);
-        }
-
-        pusherClient.subscribe(
+        const channel = pusherClient.subscribe(
             toPusherKey(
                 `chat:${chatHrefConstructor(
                     sessionId,
@@ -36,17 +32,12 @@ export default function Messages({
                 )}:messages`
             )
         );
-        pusherClient.bind("chat", handleChat);
+        channel.bind("added", (msg: Message) => {
+            setMessages((prev) => [msg, ...prev]);
+        });
         return () => {
-            pusherClient.unsubscribe(
-                toPusherKey(
-                    `chat:${chatHrefConstructor(
-                        sessionId,
-                        chatPartner.id
-                    )}:messages`
-                )
-            );
-            pusherClient.unbind("chat", handleChat);
+            channel.unsubscribe();
+            channel.unbind_all();
         };
     }, [chatPartner, sessionId]);
 

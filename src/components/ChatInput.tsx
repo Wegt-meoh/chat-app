@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 import Button from "./ui/Button";
 import axios from "axios";
@@ -40,7 +40,7 @@ export default function ChatInput({ chatId }: Props) {
             await axios.post("/api/message/send", {
                 text: input,
                 chatId: chatId,
-                timestamp: new Date(),
+                timestamp: Date.now(),
             });
             setInput("");
             textareaRef.current?.focus();

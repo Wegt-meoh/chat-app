@@ -1,59 +1,40 @@
 "use client";
-import { pusherClient } from "@/lib/pusher";
+import { pusherClient } from "@/lib/pusher-client";
 import { toPusherKey } from "@/lib/utils";
 import { User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 type Props = {
-    initialUnseenFriendRequestsCount: number;
+    initialFriendRequestCount: number;
     sessionId: string;
 };
 
-export default function FriendRequestSideBarOptions({
-    initialUnseenFriendRequestsCount,
+export default function FriendRequestSideBarOption({
+    initialFriendRequestCount,
     sessionId,
 }: Props) {
-    const [unHandleRequestCount, setUnHandleRequestCount] = useState(
-        initialUnseenFriendRequestsCount
-    );
-
     const router = useRouter();
+    const unHandleRequestCount = initialFriendRequestCount;
 
     useEffect(() => {
-        function incomingFriendRequest() {
-            console.log("incomingFriendRequest");
-            setUnHandleRequestCount((a) => a + 1);
-            router.refresh();
-        }
-        function acceptOrDenyFriendReqest() {
-            console.log("acceptFriendReqest");
-            setUnHandleRequestCount((a) => a - 1);
-            router.refresh();
-        }
-
-        pusherClient.subscribe(
-            toPusherKey(`user:${sessionId}:incoming_friend_requests`)
+        const channek = pusherClient.subscribe(
+            toPusherKey(`user:${sessionId}:incoming_friend_requests:count`)
         );
-        pusherClient.subscribe(toPusherKey(`user:${sessionId}:friends`));
-
-        pusherClient.bind("newFriend", acceptOrDenyFriendReqest);
-        pusherClient.bind("deny", acceptOrDenyFriendReqest);
-        pusherClient.bind("incoming_friend_requests", incomingFriendRequest);
-
+        channek.bind("added", () => {
+            router.refresh();
+        });
+        channek.bind("deny", () => {
+            router.refresh();
+        });
+        channek.bind("accept", () => {
+            router.refresh();
+            console.log("accept");
+        });
         return () => {
-            pusherClient.unsubscribe(
-                toPusherKey(`user:${sessionId}:incoming_friend_requests`)
-            );
-            pusherClient.unsubscribe(toPusherKey(`user:${sessionId}:friends`));
-
-            pusherClient.unbind("deny", acceptOrDenyFriendReqest);
-            pusherClient.unbind("newFriend", acceptOrDenyFriendReqest);
-            pusherClient.unbind(
-                "incoming_friend_requests",
-                incomingFriendRequest
-            );
+            channek.unsubscribe();
+            channek.unbind_all();
         };
     }, [sessionId, router]);
 

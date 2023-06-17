@@ -1,7 +1,7 @@
 import { fetchRedis } from "@/helpers/redis";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { pusherServer } from "@/lib/pusher";
+import { pusherServer } from "@/lib/pusher-server";
 import { chatHrefConstructor, toPusherKey } from "@/lib/utils";
 import { messageValidator } from "@/lib/validations/message";
 import { nanoid } from "nanoid";
@@ -12,36 +12,33 @@ export async function POST(req: Request) {
         const body: { text: string; chatId: string; timestamp: number } =
             await req.json();
         const session = await getServerSession(authOptions);
-
         if (!session) {
             return new Response("Unauthrized", { status: 401 });
         }
+        const sender = session.user;
+        const receiverId = body.chatId;
 
         const friendIds: string[] = await fetchRedis(
             "smembers",
-            `user:${session.user.id}:friends`
+            `user:${sender.id}:friends`
         );
 
-        const isFriend = friendIds.includes(body.chatId);
+        const isFriend = friendIds.includes(receiverId);
         if (!isFriend) {
             throw new Response("Unauthoried", { status: 401 });
         }
 
-        const messageData: Message = {
+        const message = messageValidator.parse({
             id: nanoid(),
-            senderId: session.user.id,
-            receiverId: body.chatId,
+            senderId: sender.id,
+            receiverId: receiverId,
             text: body.text,
             timestamp: body.timestamp,
-        };
-        const message = messageValidator.parse(messageData);
+        });
 
         await Promise.all([
             db.zadd(
-                `chat:${chatHrefConstructor(
-                    session.user.id,
-                    body.chatId
-                )}:messages`,
+                `chat:${chatHrefConstructor(sender.id, receiverId)}:messages`,
                 {
                     score: body.timestamp,
                     member: JSON.stringify(message),
@@ -49,25 +46,19 @@ export async function POST(req: Request) {
             ),
             pusherServer.triggerBatch([
                 {
-                    channel: toPusherKey(
-                        `chat:${chatHrefConstructor(
-                            session.user.id,
-                            body.chatId
-                        )}:messages`
-                    ),
-                    name: "chat",
-                    data: {
-                        ...message,
-                    },
+                    channel: toPusherKey(`reciever:${receiverId}:message`),
+                    name: "added",
+                    data: message,
                 },
                 {
-                    channel: toPusherKey(`receiver:${body.chatId}:newMessage`),
-                    name: "message_coming",
-                    data: {
-                        ...message,
-                        senderImg: session.user.image,
-                        senderName: session.user.name,
-                    },
+                    channel: toPusherKey(
+                        `chat:${chatHrefConstructor(
+                            sender.id,
+                            receiverId
+                        )}:messages`
+                    ),
+                    name: "added",
+                    data: message,
                 },
             ]),
         ]);

@@ -1,5 +1,4 @@
 import AddFriendsButton from "@/components/AddFriendsButton";
-import React from "react";
 
 type Props = {};
 

@@ -1,7 +1,6 @@
 import { chatHrefConstructor, cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
 import { toast } from "react-hot-toast";
 import { type Toast } from "react-hot-toast";
 
@@ -20,6 +19,10 @@ export default function UnseenChatToast({
     senderName,
     senderMsg,
 }: Props) {
+    function dismiss() {
+        toast.dismiss(t.id);
+    }
+
     return (
         <div
             className={cn(
@@ -27,10 +30,8 @@ export default function UnseenChatToast({
                 { "animate-enter": t.visible, "animate-leave": !t.visible }
             )}
         >
-            <a
-                onClick={() => {
-                    toast.dismiss(t.id);
-                }}
+            <Link
+                onClick={dismiss}
                 className="flex-1 w-0 p-4"
                 href={`/dashboard/chat/${chatId}`}
             >
@@ -56,14 +57,14 @@ export default function UnseenChatToast({
                         </p>
                     </div>
                 </div>
-            </a>
+            </Link>
 
             <div className="flex border-l border-gray-200">
                 <button
                     type="button"
                     title="close"
                     className="w-full border border-transparent rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    onClick={() => toast.dismiss(t.id)}
+                    onClick={dismiss}
                 >
                     Close
                 </button>

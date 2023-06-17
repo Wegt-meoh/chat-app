@@ -1,28 +1,28 @@
 import { fetchRedis } from "@/helpers/redis";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { pusherServer } from "@/lib/pusher";
+import { pusherServer } from "@/lib/pusher-server";
 import { toPusherKey } from "@/lib/utils";
 import { addFriendValidator } from "@/lib/validations/add-friend";
 import { getServerSession } from "next-auth";
 import { ZodError } from "zod";
 
+// send friend request
 export async function POST(req: Request) {
     try {
         const body = await req.json();
         const { email: emailToAdd } = addFriendValidator.parse(body.email);
 
+        // check
         const idToAdd = (await fetchRedis(
             "get",
             `user:email:${emailToAdd}`
         )) as string | null;
-
         if (!idToAdd) {
             return new Response("This email does not exist", { status: 400 });
         }
 
         const session = await getServerSession(authOptions);
-
         if (!session) {
             return new Response("Unauthorized", { status: 401 });
         }
@@ -33,13 +33,13 @@ export async function POST(req: Request) {
             });
         }
 
-        const isFriendAdded = (await fetchRedis(
+        const isRequestSended = (await fetchRedis(
             "sismember",
             `user:${idToAdd}:incoming_friend_requests`,
             session.user.id
         )) as 0 | 1;
-        if (isFriendAdded) {
-            return new Response("this user is already added", {
+        if (isRequestSended) {
+            return new Response("the friend request has been sent", {
                 status: 400,
             });
         }
@@ -55,19 +55,37 @@ export async function POST(req: Request) {
             });
         }
 
+        // check succ
+        const friendRequest: FriendRequest = {
+            senderId: session.user.id,
+            senderName: session.user.name,
+            senderEmail: session.user.email,
+        };
+        const friendRequestPusherData: IncomingFriendRequest = {
+            ...friendRequest,
+        };
+
+        await db.sadd(
+            `user:${idToAdd}:incoming_friend_requests`,
+            session.user.id
+        );
         await Promise.all([
-            db.sadd(
-                `user:${idToAdd}:incoming_friend_requests`,
-                session.user.id
-            ),
-            pusherServer.trigger(
-                toPusherKey(`user:${idToAdd}:incoming_friend_requests`),
-                "incoming_friend_requests",
+            pusherServer.triggerBatch([
+                // {
+                //     channel: toPusherKey(
+                //         `user:${idToAdd}:incoming_friend_requests:details`
+                //     ),
+                //     name: "added",
+                //     data: friendRequestPusherData,
+                // },
                 {
-                    senderId: session.user.id,
-                    senderEmail: session.user.email,
-                }
-            ),
+                    channel: toPusherKey(
+                        `user:${idToAdd}:incoming_friend_requests:count`
+                    ),
+                    name: "added",
+                    data: {},
+                },
+            ]),
         ]);
 
         return new Response("OK");

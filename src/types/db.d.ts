@@ -19,7 +19,7 @@ type Chat = {
 };
 
 type FriendRequest = {
-    id: string;
     senderId: string;
-    receiverId: string;
+    senderName: string | null | undefined;
+    senderEmail: string | undefined | null;
 };

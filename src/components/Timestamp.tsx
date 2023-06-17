@@ -1,6 +1,5 @@
 "use client";
 import { cn, formatTimestamp } from "@/lib/utils";
-import React from "react";
 
 type Props = {
     timestamp: number;
