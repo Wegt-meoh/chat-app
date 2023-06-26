@@ -17,5 +17,3 @@ declare module "next-auth" {
         };
     }
 }
-
-type A = UpstashRedisAdapterOptions;

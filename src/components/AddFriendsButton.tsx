@@ -64,18 +64,21 @@ export default function AddFriendsButton({}: Props) {
                     <input
                         {...register("email")}
                         type="text"
+                        autoComplete="off"
                         className="block w-full rounded-md border-0 py-1.5 px-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                         placeholder="something@example.com"
                     />
-                    <Button type="submit" isLoading={isLoading}>
-                        {isLoading ? null : (
-                            <PlusIcon
-                                width={"16px"}
-                                height={"16px"}
-                                className="mr-2"
-                            />
-                        )}
-                        send
+                    <Button type="submit" disabled={isLoading}>
+                        <div className="flex items-center justify-center">
+                            {isLoading ? null : (
+                                <PlusIcon
+                                    width={"16px"}
+                                    height={"16px"}
+                                    className="mr-2"
+                                />
+                            )}
+                            send
+                        </div>
                     </Button>
                 </div>
                 {showSuccessState ? (

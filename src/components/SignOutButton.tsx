@@ -8,26 +8,34 @@ import { Loader2, LogOut } from "lucide-react";
 type Props = {} & ButtonHTMLAttributes<HTMLButtonElement>;
 
 export default function SignOutButton({ ...props }: Props) {
-    const [isSignOut, setIsSignOut] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     async function handleButtonClick() {
-        setIsSignOut(true);
+        setIsLoading(true);
         try {
             await signOut({ callbackUrl: "/login" });
         } catch (error) {
             toast.error("There is something error when sign out");
         } finally {
-            setIsSignOut(false);
+            console.log("finish");
+            setIsLoading(false);
         }
     }
 
     return (
-        <Button {...props} onClick={handleButtonClick} variant={"ghost"}>
-            {isSignOut ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-                <LogOut className="w-4 h-4" />
-            )}
+        <Button
+            {...props}
+            disabled={isLoading}
+            onClick={handleButtonClick}
+            variant={"ghost"}
+        >
+            <div className="flex items-center justify-center">
+                {isLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                    <LogOut className="w-4 h-4" />
+                )}
+            </div>
         </Button>
     );
 }

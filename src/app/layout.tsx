@@ -1,4 +1,4 @@
-import Providers from "@/components/Providers";
+import ToastProviders from "@/components/Providers";
 import "./globals.css";
 
 export const metadata = {
@@ -13,11 +13,9 @@ export default function RootLayout({
 }) {
     return (
         <html lang="en">
-            <head>
-                <link rel="shortcut icon" href="/icon.png" />
-            </head>
+            <head></head>
             <body>
-                <Providers>{children}</Providers>
+                <ToastProviders>{children}</ToastProviders>
             </body>
         </html>
     );
